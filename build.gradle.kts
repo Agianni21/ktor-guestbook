@@ -8,6 +8,7 @@ val kotlin_version: String by project
 plugins {
     application
     kotlin("jvm") version "1.3.30"
+    id("com.github.johnrengelman.shadow").version("5.0.0")
 }
 
 group = "ktor-guestbook"
@@ -34,6 +35,14 @@ dependencies {
     compile("io.ktor:ktor-gson:$ktor_version")
     compile("io.ktor:ktor-server-sessions:$ktor_version")
     testCompile("io.ktor:ktor-server-tests:$ktor_version")
+}
+
+tasks.withType<Jar> {
+    manifest {
+        attributes(mapOf(
+	    "Main-Class" to "io.ktor.server.netty.EngineMain"
+	))
+    }
 }
 
 kotlin.sourceSets["main"].kotlin.srcDirs("src")
