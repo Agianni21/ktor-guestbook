@@ -7,7 +7,6 @@ import io.ktor.routing.*
 import io.ktor.http.*
 import freemarker.cache.*
 import io.ktor.freemarker.*
-import io.ktor.content.*
 import io.ktor.http.content.*
 import io.ktor.auth.*
 import io.ktor.gson.*
@@ -19,6 +18,9 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
+
+    var messages = listOf<GuestMessage>()
+
     install(FreeMarker) {
         templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
     }
@@ -38,32 +40,29 @@ fun Application.module(testing: Boolean = false) {
     }
 
     routing {
+
+        post("/") {
+            val formData = call.receiveParameters()
+            val name = formData.get("name") ?: "<NO NAME>"
+            val message = formData.get("message") ?: "<NO MESSAGE>"
+            messages = messages + GuestMessage(name, message)
+            call.application.environment.log.info("Name: $name, message: $message")
+            call.respondRedirect("/")
+        }
+
         get("/") {
-            call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
+            call.application.environment.log.info("Someone entered to guest book")
+            call.respond(FreeMarkerContent("index.ftl", mapOf("messages" to messages), ""))
         }
 
-        get("/html-freemarker") {
-            call.respond(FreeMarkerContent("index.ftl", mapOf("data" to IndexData(listOf(1, 2, 3))), ""))
-        }
-
-        // Static feature. Try to access `/static/ktor_logo.svg`
         static("/static") {
             resources("static")
         }
 
-        get("/json/gson") {
-            call.respond(mapOf("hello" to "world"))
-        }
-
-        get("/session/increment") {
-            val session = call.sessions.get<MySession>() ?: MySession()
-            call.sessions.set(session.copy(count = session.count + 1))
-            call.respondText("Counter is ${session.count}. Refresh to increment.")
-        }
     }
 }
 
-data class IndexData(val items: List<Int>)
+data class GuestMessage(val name: String, val message: String)
 
 data class MySession(val count: Int = 0)
 

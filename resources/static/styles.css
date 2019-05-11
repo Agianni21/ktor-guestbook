@@ -1,0 +1,9 @@
+div.message {
+    border-style: solid;
+    margin-top: 30px;
+    width: 400px;
+}
+
+p.message_name {
+    font-weight: bold;
+}
