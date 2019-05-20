@@ -1,10 +1,7 @@
 FROM alpine:3.9 AS builder
 
-# Default to UTF-8 file.encoding
 ENV LANG C.UTF-8
 
-# add a simple script that can auto-detect the appropriate JAVA_HOME value
-# based on whether the JDK or only the JRE is installed
 RUN { \
 		echo '#!/bin/sh'; \
 		echo 'set -e'; \
@@ -32,14 +29,11 @@ RUN ./gradlew build
 RUN tar -xf build/distributions/ktor-guestbook-shadow-0.0.1.tar
 RUN mv ktor-guestbook-shadow-0.0.1 app
 
-## RUNTIME
+## RUNTIME CONTAINER
 
 FROM alpine:3.9
-# Default to UTF-8 file.encoding
 ENV LANG C.UTF-8
 
-# add a simple script that can auto-detect the appropriate JAVA_HOME value
-# based on whether the JDK or only the JRE is installed
 RUN { \
 		echo '#!/bin/sh'; \
 		echo 'set -e'; \
